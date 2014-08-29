@@ -57,7 +57,13 @@ func formKey(key string, r runner, topoName string, instance int) string {
 //note that this is the lowest level code that knows about the options to docker and etcd.
 //this code is the actual implementation of start.
 func (p *policyInput) start(teeOutput bool, image string, topoName string, instance int, links map[string]string, rv *runVolumeSpec, cli io.DockerCli, etcd io.EtcdClient) error {
-
+	// TODO : Horrible temporary hack alert
+	// It seem currently if the plume container is started to quickly after plumedb then postgres is not fully started yet
+	// And then plume does not work
+	// Of course the proper fix will be to have plume retry the Postgres connection and that will be implemented shortly
+	// and this here will then be removed.
+	// but with this temporary hack ftests work.
+	time.Sleep(3 * time.Second)
 	vols := make(map[string]string)
 	if rv != nil {
 		vols[rv.source] = rv.mountAt

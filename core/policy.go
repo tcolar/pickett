@@ -53,6 +53,12 @@ func formKey(key string, r runner, topoName string, instance int) string {
 	return filepath.Join(io.PICKETT_KEYSPACE, key, topoName, r.name(), fmt.Sprint(instance))
 }
 
+// Base Key for the state of a topology.
+// ie : /pickett/state/topo/
+func TopoStateKey(topoName string) string {
+	return filepath.Join(io.PICKETT_KEYSPACE, "state", topoName)
+}
+
 //start runs the runner in its policyInput and records the docker container name into etcd.
 //note that this is the lowest level code that knows about the options to docker and etcd.
 //this code is the actual implementation of start.

@@ -19,7 +19,7 @@ type runVolumeSpec struct {
 
 // CmdRun is the 'run' entry point of the program with the targets filled in
 // and a working helper.
-func CmdRun(target string, runVol string, config *Config) (int, error) {
+func CmdRun(target string, runVol string, keepEtcd bool, config *Config) (int, error) {
 	var vol *runVolumeSpec
 	if runVol != "" {
 		pair := strings.Split(runVol, ":")
@@ -27,6 +27,13 @@ func CmdRun(target string, runVol string, config *Config) (int, error) {
 			return 1, fmt.Errorf("unable to understand run volume (%s), should be /foo:/bar/foo", runVol)
 		}
 		vol = &runVolumeSpec{pair[0], pair[1]}
+	}
+	if !keepEtcd {
+		// Clear the topo state from Etcd
+		topo := strings.Split(target, ".")[0]
+		key := TopoStateKey(topo)
+		flog.Infof("Cleaning topo etcd state %s", key)
+		config.etcd.RecursiveDel(key)
 	}
 	return config.Execute(target, vol)
 }
